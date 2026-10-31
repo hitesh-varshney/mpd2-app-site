@@ -70,6 +70,7 @@ h2.lane{font:600 15px/1.2 var(--ui);color:var(--mute);margin:30px 0 10px;letter-
 .tbb{display:block;padding:14px 14px 16px;color:var(--ink)}
 .tt{display:block;font:600 24px/1.15 var(--ui);margin-bottom:6px}
 .tw{display:block;color:var(--ink)}
+.today .list.flat{border:0;border-top:1px solid var(--rule);border-radius:0}
 .tl{display:block;margin-top:10px;font:500 14px var(--ui);color:var(--green)}
 .tasks{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
 .task{display:flex;flex-direction:column;justify-content:space-between;gap:6px;min-height:76px;padding:11px 12px;background:var(--paper);color:var(--ink);font:500 15.5px/1.25 var(--ui)}
@@ -210,7 +211,7 @@ details.exs .ex{margin-top:6px}
 <a href="#saved" data-n="saved"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</a>
 <a href="#more" data-n="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a></nav>
 <script>
-window.APPVER='b2470c8f';
+window.APPVER='3f2c8fad';
 window.startApp=function(D){
 'use strict';
 var main=document.getElementById('main'),bar=document.getElementById('bar');
@@ -288,9 +289,9 @@ function sections(b){
 /* ---------- today ---------- */
 function chicagoDate(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago'}).format(new Date());}catch(e){return new Date().toISOString().slice(0,10);}}
 function today(){
-  var d=chicagoDate(),n=Math.round((Date.parse(d+'T00:00:00Z')-Date.parse(D.qstart+'T00:00:00Z'))/864e5)+1;
-  if(n<1||!D.queue.length)return null;
-  var id=D.queue[(n-1)%D.queue.length];return byId[id]?{n:n,c:byId[id]}:null;
+  var e=D.cal&&D.cal[chicagoDate()];if(!e)return null;
+  if(e[1])return byId[e[1]]?{n:e[0],c:byId[e[1]]}:null;
+  return {n:e[0],review:(e[2]||[]).filter(function(id){return byId[id];})};
 }
 
 /* ---------- search ---------- */
@@ -361,7 +362,9 @@ function vHome(){
   topbar('',false);setNav('home');
   var td=today(),rec=lsGet('recent',[]).filter(function(id){return byId[id];}).slice(0,3);
   var h='<section class="hero"><h1>What are you working on?</h1><a class="fakesearch" href="#search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search '+D.cards.length.toLocaleString()+' concepts</a></section>';
-  if(td){var c=td.c;
+  if(td&&td.review){
+    h+='<section class="today"><div class="tbh"><span>Weekly review</span><span>Brief no. '+td.n+'</span></div><div class="tbb"><span class="tt">This week\'s concepts</span><span class="tw">Can you explain each one in a sentence? Open any you are unsure of.</span></div><div class="list flat">'+td.review.map(function(id){return row(byId[id]);}).join('')+'</div></section>';}
+  else if(td){var c=td.c;
     h+='<section class="today"><div class="tbh"><span>Today\'s concept</span><span>Brief no. '+td.n+'</span></div><a class="tbb" href="#c-'+c.id+'"><span class="tt">'+esc(c.t)+'</span>'+(c.w?'<span class="tw">'+esc(c.w)+'</span>':'')+'<span class="tl">'+esc(cap(c.k))+'</span></a></section>';}
   if(rec.length){h+='<h2 class="lane">Pick up where you left off</h2><div class="list">'+rec.map(function(id){return row(byId[id]);}).join('')+'</div>';}
   h+='<h2 class="lane">Find by work task</h2><div class="tasks">';
