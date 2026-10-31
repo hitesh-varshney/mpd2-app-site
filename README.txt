@@ -1,11 +1,5 @@
 MPD2 Field Reference (installable web app)
-Files here are the whole site. data.enc is encrypted; the passphrase unlocks it on your phone once per device.
-
-Put it online (GitHub Pages, free):
-1. github.com > New repository. Name it e.g. mpd2-ref. Public. Create.
-2. On the repo page: Add file > Upload files. Drag in everything from this folder (index.html, sw.js, manifest.webmanifest, data.enc, and the icons folder). Commit.
-3. Settings > Pages > Source: Deploy from a branch > main > / (root) > Save.
-4. After a minute the site is at https://YOURNAME.github.io/mpd2-ref/
-5. On your Android phone, open that address in Chrome, enter the passphrase, then menu > Install app.
-
-To update later: upload the new files over the old ones (same names) and commit.
+Live: https://hitesh-varshney.github.io/mpd2-app-site/  (repo: github.com/hitesh-varshney/mpd2-app-site)
+Flat folder, no subfolders. data.enc is encrypted; the passphrase unlocks it once per device.
+Updates are built and pushed by Claude (build: _mpd2_kb/app2_src/build2.py). Your local copy mirrors the repo.
+On the phone: open the site in Chrome, enter the passphrase, then menu > Install app.
