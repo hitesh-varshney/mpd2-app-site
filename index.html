@@ -232,7 +232,7 @@ a.btn.wide{background:var(--ink);color:var(--paper);margin:6px 0}
 <a href="#saved" data-n="saved"><span class="bw"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h11a2 2 0 0 1 2 2v11"/></svg><b id="duebadge" style="display:none"></b></span>Library</a>
 <a href="#more" data-n="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a></nav>
 <script>
-window.APPVER='604fde82';
+window.APPVER='471d3d14';
 window.startApp=function(D){
 'use strict';
 var main=document.getElementById('main'),bar=document.getElementById('bar');
@@ -344,6 +344,7 @@ function score(c,terms,phrase){
     if(n){s+=Math.min(n,6)*0.8;hit=1;}
     if(!hit)return 0;}
   if(c.r==='reference')s*=0.8;
+  s+=Math.min(c.c.length,5)*0.15+(c.q==='high'?0.2:0);
   return s;
 }
 function near(a,b){if(a===b)return true;if(a.length<4||Math.abs(a.length-b.length)>1)return false;var i=0,j=0,d=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}d++;if(d>1)return false;if(a.length>b.length)i++;else if(a.length<b.length)j++;else{i++;j++;}}return d+(a.length-i)+(b.length-j)<=1;}
@@ -496,6 +497,7 @@ function vCard(id){
   h+='<div class="notes" id="notes">'+notes.map(function(s,i){return '<details class="fold"'+((short||i===0)?' open':'')+'><summary>'+esc(s.h)+'</summary><div class="prose">'+md(s.body)+'</div></details>';}).join('')+'</div>';
   if(rel&&rel.body){var ids=[];rel.body.replace(idRe,function(w){if(byId[w]&&w!==c.id&&ids.indexOf(w)<0)ids.push(w);});
     if(ids.length)h+='<h2 class="lane">Related</h2><div class="rel">'+ids.map(function(x){return '<a href="#c-'+x+'">'+esc(byId[x].t)+'</a>';}).join('')+'</div>';}
+  if(c.dup&&c.dup.length)h+='<h2 class="lane">Same idea, other name</h2><div class="rel">'+c.dup.filter(function(x){return byId[x];}).map(function(x){return '<a href="#c-'+x+'">'+esc(byId[x].t)+'</a>';}).join('')+'</div>';
   if(exs.length)h+='<h2 class="lane">Worked examples ('+exs.length+')</h2>'+exs.slice(0,3).map(function(e){return exItem(e,false);}).join('')+(exs.length>3?'<details class="exs"><summary>'+(exs.length-3)+' more</summary>'+exs.slice(3).map(function(e){return exItem(e,false);}).join('')+'</details>':'');
   h+='<details class="src"><summary>Sources ('+c.src.length+')</summary><ul>'+c.src.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul></details>';
   if(c.a.length)h+='<details class="src"><summary>Also called ('+c.a.length+')</summary><p>'+c.a.map(esc).join(', ')+'</p></details>';
