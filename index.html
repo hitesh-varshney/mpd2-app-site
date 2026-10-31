@@ -187,6 +187,27 @@ details.exs .ex{margin-top:6px}
 #bnav svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #bnav a.on{color:var(--green)} #bnav a.on svg{stroke-width:2.4}
 
+/* learning */
+.learn{margin:4px 0 16px;padding:12px 14px;border:1px solid var(--rule);border-radius:10px;background:var(--paper)}
+.lq{margin:0 0 10px;font:600 15.5px var(--ui)} .ls{margin:8px 0 0;font:400 14px var(--ui);color:var(--mute)} .ls:empty{display:none}
+.btn.wide{display:flex;align-items:center;justify-content:center;width:100%;color:var(--ink)}
+a.btn.wide{background:var(--ink);color:var(--paper);margin:6px 0}
+.revcta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--green);color:var(--paper)}
+.revcta b{display:block;font:600 17px var(--ui)} .revcta small{display:block;font:400 14px var(--ui);opacity:.85}
+.go2{font:600 15px var(--ui);padding:8px 14px;border:1.5px solid currentColor;border-radius:8px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;background:var(--paper);margin:6px 0 12px}
+.stats div{padding:10px 12px;border-left:1px solid var(--rule)} .stats div:first-child{border-left:0}
+.stats b{display:block;font:600 26px/1.1 var(--ui)} .stats span{font:400 13.5px var(--ui);color:var(--mute)}
+.prog{display:grid;gap:10px}
+.pr{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font:400 14.5px var(--ui)}
+.pc{color:var(--mute)} .pb{grid-column:1/3;position:relative;height:8px;border-radius:4px;background:var(--rule);overflow:hidden}
+.pb i{position:absolute;left:0;top:0;bottom:0;background:var(--green-soft);border-right:0} .pb i.k{background:var(--green)}
+.flash{padding:16px;border:1.5px solid var(--ink);border-radius:10px;background:var(--paper);margin-bottom:12px}
+.fq{margin:0 0 6px;font:500 14px var(--ui);color:var(--mute)} .flash .ct{margin:0 0 4px}
+.rv .btn{flex:1}
+.bw{position:relative;display:inline-flex}
+#duebadge{position:absolute;top:-4px;right:-10px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font:600 11px/18px var(--ui);text-align:center}
+
 /* lock */
 #lock{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
 #lockform{width:100%;max-width:360px}
@@ -208,10 +229,10 @@ details.exs .ex{margin-top:6px}
 <a href="#home" data-n="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Home</a>
 <a href="#search" data-n="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</a>
 <a href="#tasks" data-n="tasks"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Tasks</a>
-<a href="#saved" data-n="saved"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Saved</a>
+<a href="#saved" data-n="saved"><span class="bw"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h11a2 2 0 0 1 2 2v11"/></svg><b id="duebadge" style="display:none"></b></span>Library</a>
 <a href="#more" data-n="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a></nav>
 <script>
-window.APPVER='3f2c8fad';
+window.APPVER='cf6db779';
 window.startApp=function(D){
 'use strict';
 var main=document.getElementById('main'),bar=document.getElementById('bar');
@@ -228,6 +249,18 @@ function favs(){return lsGet('favs',[]);}
 function isFav(id){return favs().indexOf(id)>-1;}
 function toggleFav(id){var f=favs(),i=f.indexOf(id);if(i>-1)f.splice(i,1);else f.unshift(id);lsSet('favs',f);return i<0;}
 function pushRecent(id){var r=lsGet('recent',[]).filter(function(x){return x!==id;});r.unshift(id);lsSet('recent',r.slice(0,30));}
+/* spaced review: box 0..5, intervals in days */
+var GAPS=[1,3,7,16,35,90];
+function dayAdd(n){var d=new Date(Date.parse(chicagoDate()+'T12:00:00Z')+n*864e5);return d.toISOString().slice(0,10);}
+function deck(){return lsGet('deck',{});}
+function inDeck(id){return !!deck()[id];}
+function mark(id,knew){var d=deck(),e=d[id]||{b:-1};e.b=knew?Math.min(Math.max(e.b,0)+1,5):0;e.due=dayAdd(GAPS[Math.max(e.b,0)]);e.last=chicagoDate();d[id]=e;lsSet('deck',d);return e;}
+function addDeck(id){var d=deck();if(!d[id]){d[id]={b:-1,due:dayAdd(1),last:''};lsSet('deck',d);}}
+function dueList(){var d=deck(),t=chicagoDate();return Object.keys(d).filter(function(id){return byId[id]&&d[id].due<=t;}).sort(function(a,b){return d[a].due<d[b].due?-1:1;});}
+function nextDue(){var d=deck(),k=Object.keys(d).map(function(id){return d[id].due;}).sort();return k[0]||chicagoDate();}
+function badge(){var n=dueList().length,el=document.getElementById('duebadge');if(el){el.textContent=n||'';el.style.display=n?'':'none';}}
+function stateText(e){if(!e)return '';if(e.b>=4)return 'Known well';if(e.b<=0)return 'Learning, next review '+fmtDay(e.due);return 'Next review '+fmtDay(e.due);}
+function fmtDay(s){var t=chicagoDate();if(s<=t)return 'today';if(s===dayAdd(1))return 'tomorrow';var d=new Date(s+'T12:00:00Z');return d.toLocaleDateString(undefined,{month:'short',day:'numeric',timeZone:'UTC'});}
 function pushSearch(s){s=s.trim();if(s.length<3)return;var r=lsGet('searches',[]).filter(function(x){return x.toLowerCase()!==s.toLowerCase();});r.unshift(s);lsSet('searches',r.slice(0,8));}
 
 /* ---------- text helpers ---------- */
@@ -366,6 +399,8 @@ function vHome(){
     h+='<section class="today"><div class="tbh"><span>Weekly review</span><span>Brief no. '+td.n+'</span></div><div class="tbb"><span class="tt">This week\'s concepts</span><span class="tw">Can you explain each one in a sentence? Open any you are unsure of.</span></div><div class="list flat">'+td.review.map(function(id){return row(byId[id]);}).join('')+'</div></section>';}
   else if(td){var c=td.c;
     h+='<section class="today"><div class="tbh"><span>Today\'s concept</span><span>Brief no. '+td.n+'</span></div><a class="tbb" href="#c-'+c.id+'"><span class="tt">'+esc(c.t)+'</span>'+(c.w?'<span class="tw">'+esc(c.w)+'</span>':'')+'<span class="tl">'+esc(cap(c.k))+'</span></a></section>';}
+  var due=dueList().length,dk=Object.keys(deck()).length;
+  if(dk)h+='<a class="revcta" href="#review"><span><b>'+(due?plural(due,'concept')+' to review':'Review is clear')+'</b><small>'+(due?'About '+Math.max(1,Math.round(due*0.5))+' min':'Next one '+fmtDay(nextDue()))+'</small></span><span class="go2">'+(due?'Start':'Library')+'</span></a>';
   if(rec.length){h+='<h2 class="lane">Pick up where you left off</h2><div class="list">'+rec.map(function(id){return row(byId[id]);}).join('')+'</div>';}
   h+='<h2 class="lane">Find by work task</h2><div class="tasks">';
   D.tasks.forEach(function(t){h+='<a class="task" href="#t-'+t.slug+'"><span>'+esc(t.title)+'</span><small>'+(byTask[t.slug]||[]).length+'</small></a>';});
@@ -438,6 +473,7 @@ var lens='';
 function vCard(id){
   var c=byId[id];if(!c){main.innerHTML='<h1>Not found</h1><p class="hint">No concept with that link. <a href="#search">Search instead</a>.</p>';return;}
   pushRecent(id);topbar(cap(c.k),true);setNav('');
+  var td0=today();if(td0&&td0.c&&td0.c.id===id)addDeck(id);
   var t=T[c.k],exs=exBy[c.id]||[],secs=sections(c.b);
   var rel=secs.filter(function(s){return /^related$/i.test(s.h);})[0],notes=secs.filter(function(s){return !/^related$/i.test(s.h);});
   var lensCodes=[];(c.b.match(/^\s*[-*]?\s*\(([A-Z][^)]{2,40})\)/gm)||[]).forEach(function(m){m.replace(/[A-Z][A-Za-z]*-?\d*[A-Za-z]*/g,function(x){if(CO[x]&&lensCodes.indexOf(x)<0)lensCodes.push(x);});});
@@ -451,6 +487,8 @@ function vCard(id){
   if(c.w)h+='<p class="usew"><b>Use it when</b> '+esc(c.w.replace(/^(when|use it when)\s+/i,''))+'</p>';
   if(c.st&&c.st.length)h+='<ol class="steps">'+c.st.map(function(s){return '<li>'+inline(s)+'</li>';}).join('')+'</ol>';
   if(c.pf)h+='<p class="watch"><b>Watch out</b> '+inline(c.pf)+'</p>';
+  var de=deck()[c.id];
+  h+='<div class="learn" id="learn"><p class="lq">Could you explain this to a teammate?</p><div class="acts"><button type="button" class="btn" data-k="1">Yes, got it</button><button type="button" class="btn" data-k="0">Review later</button></div><p class="ls" id="lstate">'+esc(stateText(de))+'</p></div>';
   h+='<div class="acts"><button type="button" id="fav" class="btn'+(isFav(c.id)?' on':'')+'" aria-pressed="'+isFav(c.id)+'">'+(isFav(c.id)?'Saved':'Save')+'</button><button type="button" id="share" class="btn">Share link</button></div>';
   h+='<h2 class="lane">Full notes</h2>';
   if(lensCodes.length>1)h+='<div class="lens" role="group" aria-label="Read as course"><span>Read as</span><button type="button" data-l=""'+(lens===''?' class="on"':'')+'>All</button>'+lensCodes.map(function(x){return '<button type="button" data-l="'+x+'"'+(lens===x?' class="on"':'')+'>'+x+'</button>';}).join('')+'</div>';
@@ -462,6 +500,7 @@ function vCard(id){
   h+='<details class="src"><summary>Sources ('+c.src.length+')</summary><ul>'+c.src.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul></details>';
   if(c.a.length)h+='<details class="src"><summary>Also called ('+c.a.length+')</summary><p>'+c.a.map(esc).join(', ')+'</p></details>';
   main.innerHTML=h;
+  [].forEach.call(main.querySelectorAll('#learn [data-k]'),function(b){b.onclick=function(){var e=mark(c.id,b.getAttribute('data-k')==='1');document.getElementById('lstate').textContent=b.getAttribute('data-k')==='1'?'Nice. '+stateText(e)+'.':'Added to review. '+stateText(e)+'.';badge();};});
   document.getElementById('fav').onclick=function(e){var on=toggleFav(c.id);e.target.textContent=on?'Saved':'Save';e.target.classList.toggle('on',on);e.target.setAttribute('aria-pressed',on);};
   document.getElementById('share').onclick=function(e){var u=location.href;if(navigator.share){navigator.share({title:c.t,url:u}).catch(function(){});}else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){e.target.textContent='Link copied';});}};
   function applyLens(){var n=document.getElementById('notes');n.classList.toggle('lensed',!!lens);
@@ -491,10 +530,33 @@ function vGlossary(L){
   main.innerHTML='<h1>A to Z</h1><div class="az">'+letters.map(function(l){return '<a href="#g-'+l+'"'+(l===L?' class="on"':'')+'>'+l.toUpperCase()+'</a>';}).join('')+'<a href="#g-#"'+(L==='#'?' class="on"':'')+'>#</a></div><div class="list">'+cs.map(row).join('')+'</div>';
 }
 function vSaved(){
-  topbar('Saved',true);setNav('saved');
-  var f=favs().filter(function(id){return byId[id];}),r=lsGet('recent',[]).filter(function(id){return byId[id];});
-  main.innerHTML='<h1>Saved</h1>'+(f.length?'<div class="list">'+f.map(function(id){return row(byId[id]);}).join('')+'</div>':'<p class="hint">Nothing saved yet. Tap Save on any concept to keep it here.</p>')+
-    (r.length?'<h2 class="lane">Recently opened</h2><div class="list">'+r.slice(0,15).map(function(id){return row(byId[id]);}).join('')+'</div>':'');
+  topbar('Library',true);setNav('saved');
+  var f=favs().filter(function(id){return byId[id];}),r=lsGet('recent',[]).filter(function(id){return byId[id];}),d=deck(),ids=Object.keys(d).filter(function(id){return byId[id];});
+  var due=dueList().length,known=ids.filter(function(id){return d[id].b>=4;}).length;
+  var h='<h1>Library</h1>';
+  h+='<div class="stats"><div><b>'+due+'</b><span>due today</span></div><div><b>'+ids.length+'</b><span>in review</span></div><div><b>'+known+'</b><span>known well</span></div></div>';
+  h+=due?'<a class="btn wide" href="#review">Start review</a>':(ids.length?'<p class="hint">Nothing due. Next review '+fmtDay(nextDue())+'.</p>':'<p class="hint">Tap "Yes, got it" or "Review later" on any concept to start a review deck. Today\'s concept joins it when you open it.</p>');
+  h+='<h2 class="lane">Saved</h2>'+(f.length?'<div class="list">'+f.map(function(id){return row(byId[id]);}).join('')+'</div>':'<p class="hint">Nothing saved yet. Tap Save on any concept to keep it here.</p>');
+  if(ids.length){var by={};ids.forEach(function(id){var k=byId[id].k;by[k]=by[k]||[0,0];by[k][0]++;if(d[id].b>=4)by[k][1]++;});
+    h+='<h2 class="lane">Progress by task</h2><div class="prog">'+D.tasks.filter(function(t){return by[t.slug];}).map(function(t){var n=(byTask[t.slug]||[]).length,v=by[t.slug];
+      return '<div class="pr"><span class="pn">'+esc(t.title)+'</span><span class="pc">'+v[0]+' of '+n+'</span><span class="pb"><i style="width:'+Math.max(2,Math.round(100*v[0]/n))+'%"></i><i class="k" style="width:'+Math.round(100*v[1]/n)+'%"></i></span></div>';}).join('')+'</div><p class="hint">Dark bar: known well. Light bar: in review.</p>';}
+  if(r.length)h+='<h2 class="lane">Recently opened</h2><div class="list">'+r.slice(0,15).map(function(id){return row(byId[id]);}).join('')+'</div>';
+  main.innerHTML=h;
+}
+function vReview(){
+  topbar('Review',true);setNav('saved');
+  var list=dueList(),i=0,done=0;
+  function show(){
+    if(i>=list.length){main.innerHTML='<h1>Review done</h1><p class="lede">'+(done?plural(done,'concept')+' reviewed. ':'')+'Next one '+fmtDay(nextDue())+'.</p><a class="btn wide" href="#home">Back home</a>';badge();return;}
+    var c=byId[list[i]];
+    main.innerHTML='<p class="count">'+(i+1)+' of '+list.length+'</p><div class="flash"><p class="fq">Explain it, then say when you would use it.</p><h1 class="ct">'+esc(c.t)+'</h1><p class="rm">'+esc(cap(c.k))+'</p>'+
+      '<div id="ans" hidden>'+(c.w?'<p class="usew"><b>Use it when</b> '+esc(c.w.replace(/^(when|use it when)\s+/i,''))+'</p>':'')+(c.st&&c.st.length?'<ol class="steps">'+c.st.map(function(x){return '<li>'+inline(x)+'</li>';}).join('')+'</ol>':'')+(c.pf?'<p class="watch"><b>Watch out</b> '+inline(c.pf)+'</p>':'')+'<a href="#c-'+c.id+'">Open full card</a></div></div>'+
+      '<div class="acts rv" id="rv"><button type="button" class="btn wide" id="showa">Show answer</button></div>';
+    document.getElementById('showa').onclick=function(){document.getElementById('ans').hidden=false;
+      document.getElementById('rv').innerHTML='<button type="button" class="btn" data-k="1">I knew it</button><button type="button" class="btn" data-k="0">Still fuzzy</button>';
+      [].forEach.call(document.querySelectorAll('#rv [data-k]'),function(b){b.onclick=function(){mark(c.id,b.getAttribute('data-k')==='1');done++;i++;show();window.scrollTo(0,0);};});};
+  }
+  show();
 }
 function vMore(){
   topbar('More',true);setNav('more');
@@ -503,12 +565,20 @@ function vMore(){
     '<h2 class="lane">Reading</h2><div class="setrow"><span>Text size</span><div class="stepper"><button type="button" id="fsm" aria-label="Smaller text">A-</button><output id="fsv">'+fs+'px</output><button type="button" id="fsp" aria-label="Larger text">A+</button></div></div>'+
     '<div class="setrow"><span>Theme</span><div class="stepper"><button type="button" data-th="light">Light</button><button type="button" data-th="dark">Dark</button><button type="button" data-th="">Auto</button></div></div>'+
     '<h2 class="lane">This device</h2><div class="setrow"><span>Install as an app</span><button type="button" class="btn" id="inst">Install</button></div><p class="hint" id="insth">In Chrome: menu, then Install app.</p>'+
+    '<h2 class="lane">Back up progress</h2><p class="hint">Saved concepts and review progress live on this phone only. Copy a backup code to keep them safe or move them to another device.</p><div class="acts"><button type="button" class="btn" id="bk">Copy backup code</button><button type="button" class="btn" id="rs">Restore from code</button></div><p class="hint" id="bkm"></p>'+
     '<div class="setrow"><span>Sign out</span><button type="button" class="btn" id="so">Forget passphrase</button></div><p class="hint">Version '+(window.APPVER||'')+'</p>';
   function setFs(v){v=Math.max(14,Math.min(22,v));lsSet('fs',v);document.documentElement.style.setProperty('--fs',v+'px');document.getElementById('fsv').textContent=v+'px';}
   document.getElementById('fsm').onclick=function(){setFs(lsGet('fs',17)-1);};document.getElementById('fsp').onclick=function(){setFs(lsGet('fs',17)+1);};
   [].forEach.call(main.querySelectorAll('[data-th]'),function(b){b.onclick=function(){var v=b.getAttribute('data-th');if(v)document.documentElement.setAttribute('data-theme',v);else document.documentElement.removeAttribute('data-theme');lsSet('theme',v);};});
   document.getElementById('inst').onclick=function(){if(window.deferredInstall){window.deferredInstall.prompt();window.deferredInstall=null;}else document.getElementById('insth').textContent=window.matchMedia('(display-mode: standalone)').matches?'Already installed.':'Use the Chrome menu, then Install app.';};
   document.getElementById('so').onclick=function(){window.signOut();};
+  var bkm=document.getElementById('bkm');
+  document.getElementById('bk').onclick=function(){var code='MPD2B:'+btoa(unescape(encodeURIComponent(JSON.stringify({favs:favs(),deck:deck(),recent:lsGet('recent',[])}))));
+    if(navigator.clipboard)navigator.clipboard.writeText(code).then(function(){bkm.textContent='Backup code copied. Paste it somewhere safe, like a note or an email to yourself.';},function(){bkm.textContent=code;});else bkm.textContent=code;};
+  document.getElementById('rs').onclick=function(){var code=prompt('Paste your backup code');if(!code)return;
+    try{var o=JSON.parse(decodeURIComponent(escape(atob(code.trim().replace(/^MPD2B:/,'')))));var d=deck();Object.keys(o.deck||{}).forEach(function(k){if(!d[k]||(o.deck[k].last||'')>(d[k].last||''))d[k]=o.deck[k];});lsSet('deck',d);
+      var f=favs();(o.favs||[]).forEach(function(x){if(f.indexOf(x)<0)f.push(x);});lsSet('favs',f);bkm.textContent='Restored '+Object.keys(o.deck||{}).length+' review items and '+(o.favs||[]).length+' saved concepts.';badge();}
+    catch(e){bkm.textContent='That code did not work. Copy the whole code, starting with MPD2B:';}};
 }
 function vAbout(){
   topbar('About',true);setNav('more');
@@ -520,19 +590,19 @@ var navCount=0,clicked=false,scrolls={};
 document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href^="#"]');if(a)clicked=true;},true);
 function route(){
   var h=decodeURIComponent((location.hash||'#home').slice(1)),m;navCount++;
-  if(h==='home'||h==='')vHome();else if(h==='search')vSearch();else if(h==='tasks')vTasks();else if(h==='saved')vSaved();
+  if(h==='home'||h==='')vHome();else if(h==='search')vSearch();else if(h==='tasks')vTasks();else if(h==='saved'||h==='library')vSaved();else if(h==='review')vReview();
   else if(h==='more'||h==='settings')vMore();else if(h==='courses')vCourses();else if(h==='about')vAbout();else if(h==='glossary')vGlossary('a');
   else if((m=h.match(/^g-(.)$/)))vGlossary(m[1]);else if((m=h.match(/^c-(.+)$/)))vCard(m[1]);
   else if((m=h.match(/^tc-(.+)$/)))vTask(m[1],'topics');else if((m=h.match(/^ex-(.+)$/)))vTask(m[1],'ex');else if((m=h.match(/^t-(.+)$/)))vTask(m[1]);
   else if((m=h.match(/^course-(.+)$/)))vCourse(m[1]);else vHome();
-  var y=(!clicked&&scrolls[h])||0;clicked=false;window.scrollTo(0,y);
+  var y=(!clicked&&scrolls[h])||0;clicked=false;window.scrollTo(0,y);badge();
 }
 var cur=location.hash;
 window.addEventListener('scroll',function(){scrolls[decodeURIComponent((location.hash||'#home').slice(1))]=window.scrollY;},{passive:true});
 window.addEventListener('hashchange',route);
 document.documentElement.style.setProperty('--fs',lsGet('fs',17)+'px');
 var th=lsGet('theme','');if(th)document.documentElement.setAttribute('data-theme',th);
-route();
+route();badge();
 };
 
 (function(){
