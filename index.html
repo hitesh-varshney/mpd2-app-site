@@ -232,13 +232,13 @@ a.btn.wide{background:var(--ink);color:var(--paper);margin:6px 0}
 <a href="#saved" data-n="saved"><span class="bw"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h11a2 2 0 0 1 2 2v11"/></svg><b id="duebadge" style="display:none"></b></span>Library</a>
 <a href="#more" data-n="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a></nav>
 <script>
-window.APPVER='cf6db779';
+window.APPVER='604fde82';
 window.startApp=function(D){
 'use strict';
 var main=document.getElementById('main'),bar=document.getElementById('bar');
 var byId={},bySub={},byTask={},exBy={},exTask={},T={},CO={};
 D.cards.forEach(function(c){byId[c.id]=c;(bySub[c.s]=bySub[c.s]||[]).push(c);(byTask[c.k]=byTask[c.k]||[]).push(c);});
-D.ex.forEach(function(e){(exBy[e.cn]=exBy[e.cn]||[]).push(e);var k=(e.s||'').split('/')[0];(exTask[k]=exTask[k]||[]).push(e);});
+D.ex.forEach(function(e){(exBy[e.cn]=exBy[e.cn]||[]).push(e);(e.cs||[]).forEach(function(id){(exBy[id]=exBy[id]||[]).push(e);});var k=(e.s||'').split('/')[0];(exTask[k]=exTask[k]||[]).push(e);});
 D.tasks.forEach(function(t){T[t.slug]=t;});
 D.courses.forEach(function(c){CO[c.code]=c;});
 
@@ -377,7 +377,7 @@ function rowIn(c){return row(c,true);}
 function exItem(e,showCard){
   var body=(e.b||'').split(/\nsources:\s*\n/)[0].trim(),src=[],m,re=/file:\s*"([^"]+)"(?:\s*\n\s*loc:\s*"([^"]+)")?/g;
   while((m=re.exec(e.b||'')))src.push(m[1].split('/').pop()+(m[2]?' ('+m[2]+')':''));
-  return '<div class="ex"><div class="exh"><b>'+esc(e.p)+'</b> <span class="cc">'+esc(e.co)+'</span>'+(showCard&&byId[e.cn]?' <span class="exc">for '+cardLink(e.cn)+'</span>':'')+'</div>'+
+  return '<div class="ex"><div class="exh"><b>'+esc(e.p)+'</b> <span class="cc">'+esc(e.co)+'</span>'+(showCard&&byId[e.cn]?' <span class="exc">for '+cardLink(e.cn)+'</span>':(showCard&&e.cs&&e.cs.length?' <span class="exc">uses '+e.cs.slice(0,3).map(cardLink).join(', ')+'</span>':''))+'</div>'+
     (body?'<div class="prose">'+md(body)+'</div>':'<div class="prose"><p>'+esc(cap(e.n||''))+'</p></div>')+
     (src.length?'<details class="src"><summary>Source</summary><ul>'+src.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul></details>':'')+'</div>';
 }
