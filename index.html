@@ -232,7 +232,7 @@ a.btn.wide{background:var(--ink);color:var(--paper);margin:6px 0}
 <a href="#saved" data-n="saved"><span class="bw"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h11a2 2 0 0 1 2 2v11"/></svg><b id="duebadge" style="display:none"></b></span>Library</a>
 <a href="#more" data-n="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a></nav>
 <script>
-window.APPVER='fba4d477';
+window.APPVER='980bfcbf';
 window.startApp=function(D){
 'use strict';
 var main=document.getElementById('main'),bar=document.getElementById('bar');
@@ -272,7 +272,7 @@ function courseName(code){var c=CO[code];if(!c)return code;return c.title.replac
 function plural(n,w){return n+' '+w+(n===1?'':'s');}
 var idRe=/[a-z0-9]+(?:-[a-z0-9]+)+|[a-z0-9]{4,}/g;
 function cardLink(id){var c=byId[id];return c?'<a href="#c-'+id+'">'+esc(c.t)+'</a>':esc(nice(id));}
-function linkIds(html){return html.replace(/\[([a-z0-9][a-z0-9-]*)\]/g,function(m,id){return byId[id]?cardLink(id):m;});}
+function linkIds(html){html=html.replace(/\[task:([a-z0-9-]+)\]/g,function(m,sl){var t=T[sl];return t?'<a class="btn wide" href="#t-'+sl+'">Open the '+esc(t.title)+' task</a>':m;});return html.replace(/\[([a-z0-9][a-z0-9-]*)\]/g,function(m,id){return byId[id]?cardLink(id):m;});}
 function linkWords(text){return esc(text).replace(idRe,function(w){return byId[w]?cardLink(w):w;});}
 function inline(s){
   s=esc(s);
