@@ -232,7 +232,7 @@ a.btn.wide{background:var(--ink);color:var(--paper);margin:6px 0}
 <a href="#saved" data-n="saved"><span class="bw"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="13" rx="2"/><path d="M7 4h11a2 2 0 0 1 2 2v11"/></svg><b id="duebadge" style="display:none"></b></span>Library</a>
 <a href="#more" data-n="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>More</a></nav>
 <script>
-window.APPVER='980bfcbf';
+window.APPVER='613b1c16';
 window.startApp=function(D){
 'use strict';
 var main=document.getElementById('main'),bar=document.getElementById('bar');
@@ -351,7 +351,7 @@ function near(a,b){if(a===b)return true;if(a.length<4||Math.abs(a.length-b.lengt
 var F={course:'',task:'',kind:''};
 function searchCards(query){
   var terms=tok(query),phrase=query.toLowerCase().trim().replace(/\s+/g,' ');
-  var list=D.cards.filter(function(c){return (!F.course||c.c.indexOf(F.course)>-1)&&(!F.task||c.k===F.task)&&(!F.kind||c.r===F.kind);});
+  var list=D.cards.filter(function(c){return (!F.course||(F.course==='-TOOLKIT'?c.c.some(function(x){return x!=='TOOLKIT';}):c.c.indexOf(F.course)>-1))&&(!F.task||c.k===F.task)&&(!F.kind||c.r===F.kind);});
   if(!terms.length)return {res:[],fuzzy:false};
   var res=[];list.forEach(function(c){var s=score(c,terms,phrase);if(s>0)res.push([s,c]);});
   res.sort(function(a,b){return b[0]-a[0]||(a[1].t<b[1].t?-1:1);});res=res.map(function(x){return x[1];});
@@ -412,7 +412,7 @@ function vSearch(){
   topbar('Search',true);setNav('search');
   var q0=sessionStorage.getItem('mpd2.q')||'';
   var to='<option value="">Any task</option>'+D.tasks.map(function(t){return '<option value="'+t.slug+'"'+(F.task===t.slug?' selected':'')+'>'+esc(t.title)+'</option>';}).join('');
-  var co='<option value="">Any course</option>'+D.courses.map(function(c){return '<option value="'+c.code+'"'+(F.course===c.code?' selected':'')+'>'+esc(c.code)+'</option>';}).join('');
+  var co='<option value="">Any course</option><option value="-TOOLKIT"'+(F.course==='-TOOLKIT'?' selected':'')+'>Course material only</option>'+D.courses.map(function(c){return '<option value="'+c.code+'"'+(F.course===c.code?' selected':'')+'>'+esc(c.code==='TOOLKIT'?'Innovation Toolkit':c.code)+'</option>';}).join('');
   var ki='<option value="">Any kind</option><option value="concept"'+(F.kind==='concept'?' selected':'')+'>Concepts</option><option value="template"'+(F.kind==='template'?' selected':'')+'>Templates</option><option value="reference"'+(F.kind==='reference'?' selected':'')+'>Reference lists</option>';
   main.innerHTML='<div class="sbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="Try: willingness to pay, RICE, CAC" aria-label="Search" value="'+esc(q0)+'"></div>'+
     '<div class="filters"><select id="fc" aria-label="Course">'+co+'</select><select id="ft" aria-label="Task">'+to+'</select><select id="fk" aria-label="Kind">'+ki+'</select></div><div id="sres"></div>';
